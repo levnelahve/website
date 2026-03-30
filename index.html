@@ -1,143 +1,524 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scrollbye - Reduce Screen Time</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-            background: #f5f7fa;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scrollbye — Block Apps Instantly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0b0f;
+      --surface: #12141a;
+      --surface2: #1a1d26;
+      --accent: #5b7fff;
+      --accent2: #a78bfa;
+      --text: #f0f2ff;
+      --muted: #8890a6;
+      --border: rgba(255,255,255,0.07);
+    }
 
-        header {
-            background: #4a6cf7;
-            color: white;
-            padding: 40px 20px;
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-        header h1 {
-            margin: 0;
-            font-size: 2.5em;
-        }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        header p {
-            margin-top: 10px;
-            font-size: 1.2em;
-        }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none; z-index: 1000;
+    }
 
-        section {
-            padding: 40px 20px;
-            max-width: 800px;
-            margin: auto;
-            flex: 1;
-        }
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 40px;
+      background: rgba(10,11,15,0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;
+      color: var(--text); text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
 
-        .feature {
-            margin-top: 20px;
-            font-size: 1.1em;
-        }
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      padding: 140px 40px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
 
-        .btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 28px;
-            background: #4a6cf7;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 1.1em;
-        }
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(91,127,255,0.15) 0%, transparent 65%);
+      top: 0; left: -200px;
+      pointer-events: none;
+    }
 
-        footer {
-            background: #222;
-            color: white;
-            padding: 20px;
-            font-size: 0.9em;
-            margin-top: auto;
-        }
+    .hero-text { position: relative; z-index: 1; }
 
-        @media (max-width: 600px) {
-            header h1 {
-                font-size: 2em;
-            }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(91,127,255,0.12);
+      border: 1px solid rgba(91,127,255,0.3);
+      color: #a0b4ff;
+      font-size: 0.75rem; font-weight: 500;
+      padding: 5px 14px; border-radius: 100px;
+      margin-bottom: 24px; letter-spacing: 0.3px;
+    }
+    .badge::before { content: '●'; font-size: 0.5rem; color: var(--accent); }
 
-            header p,
-            .feature {
-                font-size: 1em;
-            }
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.07;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+    }
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-            .btn {
-                font-size: 1em;
-                padding: 10px 22px;
-            }
-        }
-    </style>
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+      max-width: 420px;
+    }
+    .hero-tagline {
+      font-size: 1rem;
+      color: var(--text);
+      font-weight: 500;
+      margin-bottom: 36px;
+      opacity: 0.85;
+    }
+
+    .hero-actions {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+    }
+    .social-proof {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--muted); font-size: 0.8rem;
+    }
+    .stars { color: #fbbf24; letter-spacing: -1px; }
+
+    /* ── PHONE IMAGE ── */
+    .hero-visual {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center;
+    }
+    .phone-screenshot {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 36px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+      animation: float 5s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* ── SECTION SHARED ── */
+    .section-label {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); text-align: center;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: -1px;
+      margin-bottom: 48px;
+      line-height: 1.2;
+    }
+
+    /* ── BREAK THE LOOP ── */
+    .break-section {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .break-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+      line-height: 1.15;
+    }
+    .break-section p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    /* ── DIFFERENTIATOR ── */
+    .diff-section {
+      padding: 20px 24px 80px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .diff-highlight {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 36px;
+      position: relative; overflow: hidden;
+    }
+    .diff-highlight::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .diff-highlight p {
+      font-size: 1.08rem; line-height: 1.7; color: var(--muted);
+    }
+    .diff-highlight strong { color: var(--text); }
+    .diff-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(91,127,255,0.1); border: 1px solid rgba(91,127,255,0.25);
+      border-radius: 100px; padding: 8px 20px;
+      font-size: 0.88rem; font-weight: 500; color: #a0b4ff;
+      margin-top: 20px;
+    }
+    .diff-pill::before { content: '→'; color: var(--accent); font-weight: 700; }
+
+    /* ── FEATURES ── */
+    .features {
+      padding: 20px 24px 80px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .feat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .feat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feat-card:hover { border-color: rgba(91,127,255,0.3); transform: translateY(-3px); }
+    .feat-card:hover::before { opacity: 1; }
+    .feat-icon {
+      width: 42px; height: 42px; border-radius: 11px;
+      background: rgba(91,127,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; margin-bottom: 16px;
+    }
+    .feat-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .feat-desc { font-size: 0.865rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── USE CASES ── */
+    .usecases {
+      padding: 20px 24px 80px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .usecases-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .usecase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 26px;
+      display: flex; align-items: flex-start; gap: 16px;
+      transition: border-color 0.2s;
+    }
+    .usecase-card:hover { border-color: rgba(91,127,255,0.25); }
+    .usecase-emoji { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+    .usecase-label {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 5px;
+    }
+    .usecase-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700; color: var(--text);
+    }
+
+    /* ── STATS ── */
+    .stats-section {
+      padding: 20px 24px 80px;
+      max-width: 800px; margin: 0 auto;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
+    }
+    .stat-item { background: var(--surface); padding: 36px 20px; text-align: center; }
+    .stat-big {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-desc { font-size: 0.8rem; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+    /* ── CTA ── */
+    .cta-section { padding: 40px 24px 120px; text-align: center; }
+    .cta-card {
+      max-width: 580px; margin: 0 auto;
+      background: linear-gradient(135deg, rgba(91,127,255,0.1), rgba(167,139,250,0.07));
+      border: 1px solid rgba(91,127,255,0.2);
+      border-radius: 28px; padding: 60px 40px;
+    }
+    .cta-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 800; letter-spacing: -1px; margin-bottom: 14px;
+    }
+    .cta-sub { color: var(--muted); font-size: 1rem; margin-bottom: 36px; line-height: 1.6; }
+    .app-store-btn { display: inline-block; transition: transform 0.2s, opacity 0.2s; }
+    .app-store-btn:hover { transform: scale(1.04); opacity: 0.9; }
+    .free-note { margin-top: 16px; color: var(--muted); font-size: 0.78rem; }
+    .free-note strong { color: #4ade80; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 40px;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 1rem; color: var(--text); text-decoration: none;
+    }
+    .footer-logo span { color: var(--accent); }
+    .footer-links { display: flex; gap: 24px; align-items: center; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--muted); font-size: 0.78rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; text-align: center; padding: 120px 24px 60px; gap: 48px; }
+      .hero-actions { align-items: center; }
+      .hero-sub { max-width: 100%; }
+      .phone-screenshot { max-width: 260px; }
+      .usecases-grid { grid-template-columns: 1fr; }
+      .stat-big { font-size: 1.6rem; }
+      nav { padding: 12px 20px; }
+      footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+      .cta-card { padding: 40px 24px; }
+      .diff-highlight { padding: 24px; }
+    }
+  </style>
 </head>
-
 <body>
-    <header>
-        <h1>Scrollbye</h1>
-        <p>Say goodbye to endless scrolling. Take back your time.</p>
-    </header>
 
-    <section>
-        
-  <a href="https://apps.apple.com/us/app/scrollbye/id6751654527?itscg=30200&itsct=apps_box_artwork&mttnsubad=6751654527" style="position: relative; width: 170px; height: 170px; overflow: hidden; display: inline-block; vertical-align: middle; 
-    --app-icon-mask: url('data:image/svg+xml,%0A%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20viewBox%3D%220%200%20230.5%20230.5%22%3E%0A%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20stroke-linejoin%3D%22round%22%20stroke-miterlimit%3D%221.4%22%20clip-rule%3D%22evenodd%22%20d%3D%22M158.2%20230H64.1a320%20320%200%200%201-7-.1c-5%200-10-.5-15-1.3a50.8%2050.8%200%200%201-14.4-4.8%2048.2%2048.2%200%200%201-21-21%2050.9%2050.9%200%200%201-4.8-14.4%20100.7%20100.7%200%200%201-1.3-15v-7l-.1-8.2V64.1a320%20320%200%200%201%20.1-7c0-5%20.5-10%201.3-15a50.7%2050.7%200%200%201%204.8-14.4%2048.2%2048.2%200%200%201%2021-21%2051%2051%200%200%201%2014.4-4.8c5-.8%2010-1.2%2015-1.3a320%20320%200%200%201%207%200l8.2-.1h94.1a320%20320%200%200%201%207%20.1c5%200%2010%20.5%2015%201.3a52%2052%200%200%201%2014.4%204.8%2048.2%2048.2%200%200%201%2021%2021%2050.9%2050.9%200%200%201%204.8%2014.4c.8%205%201.2%2010%201.3%2015a320%20320%200%200%201%20.1%207v102.3l-.1%207c0%205-.5%2010-1.3%2015a50.7%2050.7%200%200%201-4.8%2014.4%2048.2%2048.2%200%200%201-21%2021%2050.8%2050.8%200%200%201-14.4%204.8c-5%20.8-10%201.2-15%201.3a320%20320%200%200%201-7%200l-8.2.1z%22%2F%3E%0A%3C%2Fsvg%3E%0A');">
-  
-      <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e5/96/1d/e5961d38-c60d-6326-dc13-58a00a3cc7d1/scrollbye_v2-0-0-1x_U007epad-0-1-sRGB-85-220.png/540x540bb.jpg" alt="Scrollbye"
-           style="width: 100%; height: 100%; object-fit: contain;
-           mask-image: var(--app-icon-mask); -webkit-mask-image: var(--app-icon-mask);" />
-    
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230.5 230.5" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; box-sizing: border-box;">
-  <path fill="none" stroke="#000" stroke-linejoin="round" stroke-miterlimit="1.4" stroke-opacity=".1" stroke-width="1" d="M158.2 230H64.1a320 320 0 0 1-7-.1c-5 0-10-.5-15-1.3a50.8 50.8 0 0 1-14.4-4.8 48.2 48.2 0 0 1-21-21 50.9 50.9 0 0 1-4.8-14.4 100.7 100.7 0 0 1-1.3-15v-7l-.1-8.2V64.1a320 320 0 0 1 .1-7c0-5 .5-10 1.3-15a50.7 50.7 0 0 1 4.8-14.4 48.2 48.2 0 0 1 21-21 51 51 0 0 1 14.4-4.8c5-.8 10-1.2 15-1.3a320 320 0 0 1 7 0l8.2-.1h94.1a320 320 0 0 1 7 .1c5 0 10 .5 15 1.3a52 52 0 0 1 14.4 4.8 48.2 48.2 0 0 1 21 21 50.9 50.9 0 0 1 4.8 14.4c.8 5 1.2 10 1.3 15a320 320 0 0 1 .1 7v102.3l-.1 7c0 5-.5 10-1.3 15a50.7 50.7 0 0 1-4.8 14.4 48.2 48.2 0 0 1-21 21 50.8 50.8 0 0 1-14.4 4.8c-5 .8-10 1.2-15 1.3a320 320 0 0 1-7 0l-8.2.1z" clip-rule="evenodd" vector-effect="non-scaling-stroke"/>
-</svg>
-</a>
-        <h2>What is Scrollbye?</h2>
-        <p>Scrollbye helps you reduce screen time by locking distracting apps, limiting scrolling, and promoting mindful
-            device use.</p>
-
-        <div class="feature">✅ Block apps that steal your attention</div>
-        <div class="feature">✅ Reduce endless social media scrolling</div>
-        <div class="feature">✅ Stay focused on what matters</div>
-        <div class="feature">✅ Track your progress and build healthier habits</div>
-
-        <br>
-        <br>
-        <br>
-
-        
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Scroll<span>bye</span></a>
     <a href="https://apps.apple.com/us/app/scrollbye/id6751654527?itscg=30200&itsct=apps_box_badge&mttnsubad=6751654527" style="display: inline-block;">
-    <img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us?releaseDate=1772582400" alt="Download on the App Store" style="width: 245px; height: 82px; vertical-align: middle; object-fit: contain;" />
+      <img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us?releaseDate=1772582400" alt="Download on the App Store" style="width: 120px; height: auto; vertical-align: middle; object-fit: contain;" />
     </a>
-    
-    </section>
+  </nav>
 
-    <footer style="margin-top:40px; font-size:14px; color:#888; text-align:center; line-height:1.6;">
-    <p>© 2025 ScrollBye. All rights reserved.</p>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
 
-    <p>
-        Contact: 
-        <a href="mailto:karel@scrollbye.xyz" style="color:#9bb3ff; text-decoration:none;">
-            karel@scrollbye.xyz
+    <div class="hero-text">
+      <div class="badge">Available on the App Store · Free</div>
+      <h1>Stop losing hours to<br><em>"just 5 minutes."</em></h1>
+      <p class="hero-sub">ScrollBye blocks your most addictive apps — exactly when you need it. No guilt. No hacks.</p>
+      <p class="hero-tagline">Just control.</p>
+
+      <div class="hero-actions">
+        <a href="https://apps.apple.com/us/app/scrollbye/id6751654527?itscg=30200&itsct=apps_box_badge&mttnsubad=6751654527" class="app-store-btn">
+          <img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us?releaseDate=1772582400" alt="Download on the App Store" style="width: 190px; height: auto; vertical-align: middle; object-fit: contain;" />
         </a>
-    </p>
+        <div class="social-proof">
+          <span class="stars">★★★★★</span>
+          <span>Free to download · iOS</span>
+        </div>
+      </div>
+    </div>
 
-    <p>
-        <a href="scrollbye_privacy_policy.html" style="color:#9bb3ff; text-decoration:none;">
-            Priv Pol
-        </a>
-    </p>
-</footer>
+    <div class="hero-visual">
+      <img
+        src="2.png"
+        alt="ScrollBye — Block Apps Instantly. No willpower needed."
+        class="phone-screenshot"
+      />
+    </div>
+  </section>
+
+  <!-- BREAK THE LOOP -->
+  <section class="break-section">
+    <h2>Break the scroll loop</h2>
+    <p>Social media is designed to keep you stuck. ScrollBye helps you step out on your terms — block distracting apps, schedule focus time, and finally feel in control of your phone.</p>
+  </section>
+
+  <!-- DIFFERENTIATOR -->
+  <section class="diff-section">
+    <div class="section-label">What makes ScrollBye different</div>
+    <h2 class="section-title">Most apps rely on willpower.<br>ScrollBye removes the decision entirely.</h2>
+
+    <div class="diff-highlight">
+      <p>When an app is blocked, it's <strong>actually blocked</strong> — no easy escape hatch, no "are you sure?" loop you can skip in two taps. We add real friction between you and the distraction, so your future self doesn't undo what your present self set up.</p>
+      <div class="diff-pill">Set it once &nbsp;·&nbsp; it works automatically</div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to stay focused</h2>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🔒</div>
+        <div class="feat-title">Smart App Blocking</div>
+        <p class="feat-desc">Block any app that steals your time — social media, games, anything. Set once, enforced always.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⏰</div>
+        <div class="feat-title">Scheduled Focus Time</div>
+        <p class="feat-desc">Create daily "no-scroll" periods that run automatically — no manual activation needed.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🚧</div>
+        <div class="feat-title">No Impulse Unblocking</div>
+        <p class="feat-desc">Real friction between you and distractions — so you don't relapse in 2 taps when temptation hits.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Lightweight & Fast</div>
+        <p class="feat-desc">No clutter. No complicated setup. No subscription required to get started. Just works.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section class="usecases">
+    <div class="section-label">Built for real life</div>
+    <h2 class="section-title">Whatever you're doing,<br>ScrollBye has your back</h2>
+
+    <div class="usecases-grid">
+      <div class="usecase-card">
+        <div class="usecase-emoji">💼</div>
+        <div>
+          <div class="usecase-label">Working?</div>
+          <div class="usecase-text">Stay focused</div>
+        </div>
+      </div>
+      <div class="usecase-card">
+        <div class="usecase-emoji">📚</div>
+        <div>
+          <div class="usecase-label">Studying?</div>
+          <div class="usecase-text">Remove distractions</div>
+        </div>
+      </div>
+      <div class="usecase-card">
+        <div class="usecase-emoji">🌙</div>
+        <div>
+          <div class="usecase-label">Sleeping?</div>
+          <div class="usecase-text">Stop late-night scrolling</div>
+        </div>
+      </div>
+      <div class="usecase-card">
+        <div class="usecase-emoji">🌿</div>
+        <div>
+          <div class="usecase-label">Living?</div>
+          <div class="usecase-text">Be present again</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-big">4h+</div>
+        <div class="stat-desc">average daily screen time reclaimed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-big">0</div>
+        <div class="stat-desc">willpower required to use it</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-big">Free</div>
+        <div class="stat-desc">to download & get started today</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-card">
+      <h2 class="cta-title">Ready to feel in control<br>of your phone again?</h2>
+      <p class="cta-sub">Set it once. ScrollBye does the rest — automatically, every day.</p>
+
+      <a href="https://apps.apple.com/us/app/scrollbye/id6751654527?itscg=30200&itsct=apps_box_badge&mttnsubad=6751654527" class="app-store-btn">
+        <img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us?releaseDate=1772582400" alt="Download on the App Store" style="width: 200px; height: auto;" />
+      </a>
+
+      <p class="free-note"><strong>Free to download</strong> · iOS · No account required</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="footer-logo">Scroll<span>bye</span></a>
+    <div class="footer-links">
+      <a href="mailto:karel@scrollbye.xyz">Contact</a>
+      <a href="scrollbye_privacy_policy.html">Privacy Policy</a>
+      <a href="https://apps.apple.com/us/app/scrollbye/id6751654527">App Store</a>
+    </div>
+    <p class="footer-copy">© 2025 Scrollbye. All rights reserved.</p>
+  </footer>
+
 </body>
-
 </html>
